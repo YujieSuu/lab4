@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Catalogue — Task 1 (XML)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { border-bottom: 2px solid #4a7ba6; padding-bottom: .5rem; }
+    .book { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
+    .book h2 { margin: 0 0 .5rem; }
+    .meta { color: #555; }
+    .price { font-weight: 700; color: #2e7d32; }
+  </style>
+</head>
+<body>
+  <h1>📚 Book Catalogue</h1>
+  <p>Data loaded from <code>book.xml</code>.</p>
+  <div id="catalogue"></div>
+
+  <script>
+    fetch('book.xml')
+      .then(response => {
+        if (!response.ok) throw new Error('Fetch error: ' + response.status);
+        return response.text();
+      })
+      .then(xmlText => {
+        // Parse the XML string into an XML DOM
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+        // If the XML was not well-formed, the parser returns a <parsererror> element
+        if (xmlDoc.getElementsByTagName('parsererror').length) {
+          throw new Error('XML is not well-formed');
+        }
+
+        const books = xmlDoc.getElementsByTagName('book');
+        const container = document.getElementById('catalogue');
+
+        let html = '';
+        for (const book of books) {
+          const id     = book.getAttribute('id');
+          const title  = book.getElementsByTagName('title')[0].textContent;
+          const author = book.getElementsByTagName('author')[0].textContent;
+          const price  = book.getElementsByTagName('price')[0].textContent;
+          html += `
+            <div class="book">
+              <h2>${title}</h2>
+              <div class="meta">by ${author}</div>
+              <div class="price">$${price}</div>
+              <div class="meta"><small>ID: ${id}</small></div>
+            </div>`;
+        }
+        container.innerHTML = html;
+      })
+      .catch(err => {
+        document.getElementById('catalogue').innerHTML =
+          '<p style="color:#c62828">⚠️ ' + err.message + '</p>';
+        console.error('Fetch error: ' + err.message);
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profiles — Task 2 (JSON)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { border-bottom: 2px solid #6a4a9c; padding-bottom: .5rem; }
+    .profile { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
+    .profile h2 { margin: 0 0 .25rem; }
+    .email { color: #555; }
+    ul { margin: .5rem 0 0; padding-left: 1.25rem; }
+    .subscribed { color: #2e7d32; font-weight: 700; }
+    .not-subscribed { color: #c62828; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>👤 User Profiles</h1>
+  <p>Data loaded from <code>userProfiles.json</code>.</p>
+  <div id="profiles"></div>
+
+  <script>
+    fetch('userProfiles.json')
+      .then(response => {
+        if (!response.ok)
+          throw new Error('Fetch error: ' + response.status);
+        else
+          return response.json();
+      })
+      .then(json => {
+        const container = document.getElementById('profiles');
+        let html = '';
+        for (const user of json) {
+          const sub = user.preferences.subscription;
+          html += `
+            <div class="profile">
+              <h2>${user.firstName} ${user.lastName}</h2>
+              <div class="email">${user.email}</div>
+              <div>Date of birth: ${user.dateOfBirth}</div>
+              <ul>
+                <li>Theme: ${user.preferences.theme}</li>
+                <li>Language: ${user.preferences.language}</li>
+                <li>Notifications: ${user.preferences.notifications ? 'On' : 'Off'}</li>
+                <li class="${sub ? 'subscribed' : 'not-subscribed'}">
+                  Newsletter: ${sub ? 'Subscribed' : 'Not subscribed'}
+                </li>
+              </ul>
+              <div>
+                Address: ${user.address.street}, ${user.address.city},
+                ${user.address.state} ${user.address.zipCode}
+              </div>
+            </div>`;
+        }
+        container.innerHTML = html;
+      })
+      .catch(err => console.error('Fetch error: ' + err.message));
+  </script>
+</body>
+</html>
